@@ -3,10 +3,10 @@
 #include <boost/log/trivial.hpp>
 #include <boost/asio.hpp>
 #include <thread>
-#include "TCPServer.h"
-#include "UDPServer.h"
-#include "TCPClient.h"
-#include "UDPClient.h"
+#include "tcp/TCPServer.h"
+#include "udp/UDPServer.h"
+#include "tcp/TCPClient.h"
+#include "udp/UDPClient.h"
 #include <chrono>
 
 int main()
