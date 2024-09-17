@@ -2,6 +2,7 @@
 #include <boost/lexical_cast.hpp>
 #include <span>
 #include "UDPClient.h"
+#include "IUDPClientListener.h"
 
 namespace idea::networks::udp {
 	UDPClient::UDPClient(boost::asio::io_context& ctx)
@@ -9,6 +10,7 @@ namespace idea::networks::udp {
 		, m_strand(boost::asio::make_strand(ctx.get_executor()))
 		, m_resolver(ctx)
 		, m_socket(ctx)
+		, m_listeners()
 		, m_host()
 		, m_port()
 		, m_data()
@@ -20,6 +22,7 @@ namespace idea::networks::udp {
 		, m_strand(boost::asio::make_strand(ctx.get_executor()))
 		, m_resolver(ctx)
 		, m_socket(ctx)
+		, m_listeners()
 		, m_host(host)
 		, m_port(boost::lexical_cast<uint16_t>(port))
 		, m_data()
@@ -31,6 +34,7 @@ namespace idea::networks::udp {
 		, m_strand(boost::asio::make_strand(ctx.get_executor()))
 		, m_resolver(ctx)
 		, m_socket(ctx)
+		, m_listeners()
 		, m_host(host)
 		, m_port(port)
 		, m_data()
@@ -42,6 +46,7 @@ namespace idea::networks::udp {
 		, m_strand(std::move(client.m_strand))
 		, m_resolver(std::move(client.m_resolver))
 		, m_socket(std::move(client.m_socket))
+		, m_listeners(std::move(client.m_listeners))
 		, m_host(std::move(client.m_host))
 		, m_port(std::move(client.m_port))
 		, m_data(std::move(client.m_data))
@@ -77,7 +82,9 @@ namespace idea::networks::udp {
 			m_socket.set_option(boost::asio::socket_base::reuse_address(true));
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPClientError(e.what());
 			return false;
 		}
 
@@ -105,7 +112,9 @@ namespace idea::networks::udp {
 			m_socket.close();
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPClientError(e.what());
 			return false;
 		}
 
@@ -121,13 +130,13 @@ namespace idea::networks::udp {
 			boost::asio::bind_executor(m_strand,
 				[this, ep](const boost::system::error_code& ec, std::size_t byteTransferred) {
 					if (!ec) {
-						BOOST_LOG_TRIVIAL(trace) << "Send message..";
 						m_writeBuffer.pop_front();
 						if (!m_writeBuffer.empty())
 							onWrite();
 					}
 					else {
 						BOOST_LOG_TRIVIAL(error) << ec.message();
+						m_writeBuffer.pop_front();
 					}
 				}));
 
@@ -143,17 +152,28 @@ namespace idea::networks::udp {
 				boost::asio::bind_executor(m_strand, [this, ep](const boost::system::error_code& ec, std::size_t bytesTransferred) {
 					if (!ec) {
 						auto data = std::span<char>(m_data.data(), bytesTransferred);
-						BOOST_LOG_TRIVIAL(trace) << std::string(std::begin(data), std::end(data));
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedUDPClientData(std::string(std::begin(data), std::end(data)));
+								
+						onRead();
 					}
 					else {
-						BOOST_LOG_TRIVIAL(error) << ec.message();
-						std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedUDPClientError(ec.message());
+
+						if (m_socket.is_open()) {
+							std::this_thread::sleep_for(std::chrono::milliseconds(100));
+							onRead();
+						}
 					}
-					onRead();
 				}));
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPClientError(e.what());
 			return false;
 		}
 

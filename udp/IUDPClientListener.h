@@ -11,8 +11,8 @@ namespace idea::networks::udp
 		virtual ~IUDPClientListener() = default;
 
 	public:
-		virtual bool onReceivedUDPClientData(std::size_t channel, const std::string& data) = 0;
-		virtual bool onReceivedUDPClientError(std::size_t channel, const std::string& data) = 0;
+		virtual bool onReceivedUDPClientData(const std::string& data) = 0;
+		virtual bool onReceivedUDPClientError(const std::string& data) = 0;
 	};
 }
 

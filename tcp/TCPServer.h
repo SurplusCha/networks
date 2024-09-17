@@ -27,7 +27,7 @@ namespace idea::networks::tcp {
 			}
 			return false;
 		}
-		inline bool deleteListsener(ITCPServerListener* listener) {
+		inline bool deleteListener(ITCPServerListener* listener) {
 			if (std::find(std::begin(m_listeners), std::end(m_listeners), listener) != std::end(m_listeners))
 				m_listeners.erase(std::remove(std::begin(m_listeners), std::end(m_listeners), listener), std::end(m_listeners));
 			return true;
@@ -54,7 +54,6 @@ namespace idea::networks::tcp {
 		std::unordered_map<std::size_t, std::shared_ptr<TCPSession>>	m_sessions;
 		std::vector<ITCPServerListener*>								m_listeners;
 		std::mutex														m_mutex;
-		bool															m_setStop;
 	};
 }
 

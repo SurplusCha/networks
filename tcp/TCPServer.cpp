@@ -12,12 +12,11 @@ namespace idea::networks::tcp {
 		, m_sessions()
 		, m_listeners()
 		, m_mutex()
-		, m_setStop(true)
 	{}
 
 	bool TCPServer::create(uint16_t port)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << port;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		try {
 			m_acceptor->open(boost::asio::ip::tcp::v4());
 			boost::asio::ip::tcp::endpoint ep(boost::asio::ip::tcp::v4(), port);
@@ -25,7 +24,9 @@ namespace idea::networks::tcp {
 			m_acceptor->listen();
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedTCPServerError(-1, e.what());
 			return false;
 		}
 
@@ -35,7 +36,6 @@ namespace idea::networks::tcp {
 	bool TCPServer::bind()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		m_setStop = false;
 		return accept();
 	}
 
@@ -54,14 +54,15 @@ namespace idea::networks::tcp {
 	bool TCPServer::unbind()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		m_setStop = true;
 		try {
 			boost::asio::post(m_ctx, [this]() {
 				m_acceptor->cancel();
 			});
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedTCPServerError(-1, e.what());
 			return false;
 		}
 
@@ -86,7 +87,9 @@ namespace idea::networks::tcp {
 			});
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedTCPServerError(-1, e.what());
 			return false;
 		}
 
@@ -95,7 +98,7 @@ namespace idea::networks::tcp {
 
 	bool TCPServer::onReceivedSessionRead(std::size_t channel, const std::string& message)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel << " " << message;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		for (auto listener : m_listeners)
 			if (listener != nullptr)
 				listener->onReceivedTCPServerData(channel, message);
@@ -105,7 +108,7 @@ namespace idea::networks::tcp {
 
 	bool TCPServer::onReceivedSessionDisconnected(std::size_t channel)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		{
 			std::unique_lock<std::mutex> lock(m_mutex);
 			if (m_sessions[channel] != nullptr) {
@@ -124,7 +127,7 @@ namespace idea::networks::tcp {
 
 	bool TCPServer::onReceivedSessionError(std::size_t channel, const std::string& error)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel << " " << error;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		for (auto listener : m_listeners)
 			if (listener != nullptr)
 				listener->onReceivedTCPServerError(channel, error);
@@ -150,11 +153,13 @@ namespace idea::networks::tcp {
 					if (listener != nullptr)
 						listener->onTCPServerBound(m_sessions.size() - 1);
 
-				if (!m_setStop)
+				if (m_acceptor->is_open())
 					accept();
 			}
 			else {
-				BOOST_LOG_TRIVIAL(error) << "Accept error: " << ec.message();
+				for (auto listener : m_listeners)
+					if (listener != nullptr)
+						listener->onReceivedTCPServerError(m_sessions.size() - 1, ec.message());
 			}
 		});
 		return true;

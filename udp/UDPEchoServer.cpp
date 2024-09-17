@@ -29,20 +29,20 @@ namespace idea::networks::udp {
 	bool UDPEchoServer::destroy()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		m_udpServer->deleteListsener(this);
+		m_udpServer->deleteListener(this);
 		return m_udpServer->destroy();
 	}
 
 	bool UDPEchoServer::onReceivedUDPServerData(const std::string& ip, uint16_t port, const std::string& data)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << ip << " " << port << " " << data;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		m_udpServer->write(ip, port, data);
 		return true;
 	}
 
 	bool UDPEchoServer::onReceivedUDPServerError(const std::string& ip, uint16_t port, const std::string& data)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << ip << " " << port << " " << data;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		return true;
 	}
 }

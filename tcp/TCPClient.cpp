@@ -1,6 +1,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
 #include "TCPClient.h"
+#include "ITCPClientListener.h"
 
 namespace idea::networks::tcp {
 	TCPClient::TCPClient(boost::asio::io_context& ctx)
@@ -8,6 +9,7 @@ namespace idea::networks::tcp {
 		, m_resolver(ctx)
 		, m_socket(ctx)
 		, m_session()
+		, m_listeners()
 		, m_host()
 		, m_port()
 	{}
@@ -17,6 +19,7 @@ namespace idea::networks::tcp {
 		, m_resolver(ctx)
 		, m_socket(ctx)
 		, m_session()
+		, m_listeners()
 		, m_host(host)
 		, m_port(boost::lexical_cast<uint16_t>(port))
 	{}
@@ -26,6 +29,7 @@ namespace idea::networks::tcp {
 		, m_resolver(ctx)
 		, m_socket(ctx)
 		, m_session()
+		, m_listeners()
 		, m_host(host)
 		, m_port(port)
 	{}
@@ -35,6 +39,7 @@ namespace idea::networks::tcp {
 		, m_resolver(std::move(client.m_resolver))
 		, m_socket(std::move(client.m_socket))
 		, m_session(std::move(client.m_session))
+		, m_listeners(std::move(client.m_listeners))
 		, m_host(std::move(client.m_host))
 		, m_port(std::move(client.m_port))
 	{}
@@ -83,15 +88,24 @@ namespace idea::networks::tcp {
 							BOOST_LOG_TRIVIAL(info) << "Client local Port: " << ep.port();
 						}
 						catch (const std::exception& e) {
-							BOOST_LOG_TRIVIAL(error) << e.what();
+							for (auto listener : m_listeners)
+								if (listener != nullptr)
+									listener->onReceivedTCPClientError(e.what());
 						}
 
 						m_session = std::make_shared<TCPSession>(0, std::move(m_socket));
 						m_session->addListener(this);
 						m_session->create();
+
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onTCPClientConnected();
+
 					}
 					else {
-						BOOST_LOG_TRIVIAL(error) << "Connect error: " << ec.message();
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedTCPClientError(ec.message());
 					}
 				});
 		}
@@ -106,15 +120,23 @@ namespace idea::networks::tcp {
 						BOOST_LOG_TRIVIAL(info) << "Client local Port: " << ep.port();
 					}
 					catch (const std::exception& e) {
-						BOOST_LOG_TRIVIAL(error) << e.what();
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedTCPClientError(e.what());
 					}
 
 					m_session = std::make_shared<TCPSession>(0, std::move(m_socket));
 					m_session->addListener(this);
 					m_session->create();
+
+					for (auto listener : m_listeners)
+						if (listener != nullptr)
+							listener->onTCPClientConnected();
 				}
 				else {
-					BOOST_LOG_TRIVIAL(error) << "Connect error: " << ec.message();
+					for (auto listener : m_listeners)
+						if (listener != nullptr)
+							listener->onReceivedTCPClientError(ec.message());
 				}
 			});
 		}
@@ -151,19 +173,29 @@ namespace idea::networks::tcp {
 
 	bool TCPClient::onReceivedSessionRead(std::size_t channel, const std::string& message)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel << " " << message;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
+		for (auto listener : m_listeners)
+			if (listener != nullptr)
+				listener->onReceivedTCPClientData(message);
+
 		return true;
 	}
 
 	bool TCPClient::onReceivedSessionDisconnected(std::size_t channel)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
+		for (auto listener : m_listeners)
+			if (listener != nullptr)
+				listener->onTCPClientDisconnected();
 		return true;
 	}
 
 	bool TCPClient::onReceivedSessionError(std::size_t channel, const std::string& error)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << channel << " " << error;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
+		for (auto listener : m_listeners)
+			if (listener != nullptr)
+				listener->onReceivedTCPClientError(error);
 		return true;
 	}
 }

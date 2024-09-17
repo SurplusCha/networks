@@ -25,7 +25,7 @@ namespace idea::networks::udp {
 			}
 			return false;
 		}
-		inline bool deleteListsener(IUDPServerListener* listener) {
+		inline bool deleteListener(IUDPServerListener* listener) {
 			if (std::find(std::begin(m_listeners), std::end(m_listeners), listener) != std::end(m_listeners))
 				m_listeners.erase(std::remove(std::begin(m_listeners), std::end(m_listeners), listener), std::end(m_listeners));
 			return true;
@@ -39,7 +39,7 @@ namespace idea::networks::udp {
 		bool destroy();
 
 	private:
-		bool onRead(const boost::asio::ip::udp::endpoint& ep, const boost::system::error_code& ec, std::size_t byteTransferred);
+		bool onRead();
 		bool onWrite();
 
 	private:

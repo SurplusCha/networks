@@ -28,7 +28,7 @@ namespace idea::networks::tcp {
 	bool TCPEchoServer::destroy()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		m_tcpServer->deleteListsener(this);
+		m_tcpServer->deleteListener(this);
 		return m_tcpServer->destroy();
 	}
 

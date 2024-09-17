@@ -11,10 +11,10 @@ namespace idea::networks::tcp
 		virtual ~ITCPClientListener() = default;
 
 	public:
-		virtual bool onTCPClientConnected(std::size_t channel) = 0;
-		virtual bool onReceivedTCPClientData(std::size_t channel, const std::string& data) = 0;
-		virtual bool onReceivedTCPClientError(std::size_t channel, const std::string& data) = 0;
-		virtual bool onTCPClientDisconnected(std::size_t channel) = 0;
+		virtual bool onTCPClientConnected() = 0;
+		virtual bool onReceivedTCPClientData(const std::string& data) = 0;
+		virtual bool onReceivedTCPClientError(const std::string& data) = 0;
+		virtual bool onTCPClientDisconnected() = 0;
 	};
 }
 

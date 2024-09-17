@@ -44,7 +44,7 @@ namespace idea::networks::tcp {
 
 	bool TCPSession::write(const std::string& message)
 	{
-		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name() << message;
+		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
 		auto self(shared_from_this());
 		boost::asio::post(m_strand, [this, self, message]() {
 			bool writeInProgress = !m_writeBuffer.empty();
@@ -126,16 +126,16 @@ namespace idea::networks::tcp {
 		boost::asio::async_write(m_socket, boost::asio::buffer(m_writeBuffer.front()),
 			boost::asio::bind_executor(m_strand, [this, self](const boost::system::error_code& ec, std::size_t) {
 				if (!ec) {
-					BOOST_LOG_TRIVIAL(trace) << "Send message from Session.";
 					m_writeBuffer.pop_front();
 					if (!m_writeBuffer.empty())
 						onWrite();
 				}
 				else {
-					m_writeBuffer.clear();
 					for (auto listener : m_listeners)
 						if (listener != nullptr)
 							listener->onReceivedSessionError(m_channel, ec.message());
+
+					m_writeBuffer.pop_front();
 				}
 			}));
 		return true;

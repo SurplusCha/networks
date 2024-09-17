@@ -34,7 +34,9 @@ namespace idea::networks::udp {
 			m_socket.bind(ep);
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPServerError("", 0, e.what());
 			return false;
 		}
 
@@ -44,23 +46,7 @@ namespace idea::networks::udp {
 	bool UDPServer::bind()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		boost::asio::post(m_strand, [this]() {
-			// boost::asio::ip::udp::endpoint ep;
-			auto ep = std::make_shared<boost::asio::ip::udp::endpoint>();
-			m_socket.async_receive_from(boost::asio::buffer(m_data), *ep,
-				boost::asio::bind_executor(m_strand,
-					[this, ep](const boost::system::error_code& ec, std::size_t byteTransferred) {
-						if (!ec)
-							this->onRead(*ep, ec, byteTransferred);
-						else {
-							for (auto listener : m_listeners)
-								if (listener != nullptr)
-									listener->onReceivedUDPServerError(ep->address().to_string(), ep->port(), ec.message());
-						}
-			}));
-		});
-			
-		return true;
+		return onRead();
 	}
 
 	bool UDPServer::write(const std::string& address, uint16_t port, const std::string& message)
@@ -76,16 +62,6 @@ namespace idea::networks::udp {
 				this->onWrite();
 		});
 
-		/*
-		boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), address, std::to_string(port));
-		// auto& ep = *m_resolver.resolve(query);
-		auto ep = std::make_shared<boost::asio::ip::udp::endpoint>(*m_resolver.resolve(query));
-		m_socket.async_send_to(boost::asio::buffer(message), *ep,
-			boost::asio::bind_executor(m_strand,
-				[this, ep](const boost::system::error_code& error, std::size_t byteTransferred) {
-					this->onWrite(*ep, error, byteTransferred);
-				}));
-		*/
 		return true;
 	}
 
@@ -98,7 +74,9 @@ namespace idea::networks::udp {
 			});
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPServerError("", 0, e.what());
 			return false;
 		}
 		return true;
@@ -113,29 +91,46 @@ namespace idea::networks::udp {
 			});
 		}
 		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
+			for (auto listener : m_listeners)
+				if (listener != nullptr)
+					listener->onReceivedUDPServerError("", 0, e.what());
 			return false;
 		}
 
 		return true;
 	}
 
-	bool UDPServer::onRead(const boost::asio::ip::udp::endpoint& ep, const boost::system::error_code& ec, std::size_t byteTransferred)
+	bool UDPServer::onRead()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
-		if (!ec || ec == boost::asio::error::message_size) {
-			auto data = std::span<char>(m_data.data(), byteTransferred);
-			for (auto listener : m_listeners)
-				if (listener != nullptr)
-					listener->onReceivedUDPServerData(ep.address().to_string(), ep.port(), std::string(std::begin(data), std::end(data)));
+		try {
+			auto ep = std::make_shared<boost::asio::ip::udp::endpoint>();
+			m_socket.async_receive_from(boost::asio::buffer(m_data), *ep,
+				boost::asio::bind_executor(m_strand, [this, ep](const boost::system::error_code& ec, std::size_t bytesTransferred) {
+					if (!ec) {
+						auto data = std::span<char>(m_data.data(), bytesTransferred);
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedUDPServerData(ep->address().to_string(), 
+									ep->port(), std::string(std::begin(data), std::end(data)));
 
-			bind();
+						onRead();
+					}
+					else {
+						for (auto listener : m_listeners)
+							if (listener != nullptr)
+								listener->onReceivedUDPServerError(ep->address().to_string(), ep->port(), ec.message());
+
+						std::this_thread::sleep_for(std::chrono::milliseconds(100));
+						if (m_socket.is_open())
+							onRead();
+					}
+					}));
 		}
-		else {
+		catch (const std::exception& e) {
 			for (auto listener : m_listeners)
 				if (listener != nullptr)
-					listener->onReceivedUDPServerError(ep.address().to_string(), ep.port(), ec.message());
-
+					listener->onReceivedUDPServerError("", 0, e.what());
 			return false;
 		}
 
@@ -158,7 +153,7 @@ namespace idea::networks::udp {
 						for (auto listener : m_listeners)
 							if (listener != nullptr)
 								listener->onReceivedUDPServerError(ep->address().to_string(), ep->port(), ec.message());
-						m_writeBuffer.clear();
+						m_writeBuffer.pop_front();
 					}
 		}));
 		return true;

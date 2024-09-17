@@ -7,6 +7,7 @@
 #include "ISessionListener.h"
 
 namespace idea::networks::tcp {
+	class ITCPClientListener;
 	class TCPClient : public std::enable_shared_from_this<TCPClient>, ISessionListener
 	{
 	public:
@@ -18,6 +19,20 @@ namespace idea::networks::tcp {
 		TCPClient(TCPClient&& client) noexcept;
 		TCPClient& operator=(const TCPClient& client) = delete;
 		TCPClient& operator=(TCPClient&& client) noexcept = delete;
+
+	public:
+		inline bool addListener(ITCPClientListener* listener) {
+			if (std::find(std::begin(m_listeners), std::end(m_listeners), listener) == std::end(m_listeners)) {
+				m_listeners.emplace_back(listener);
+				return true;
+			}
+			return false;
+		}
+		inline bool deleteListener(ITCPClientListener* listener) {
+			if (std::find(std::begin(m_listeners), std::end(m_listeners), listener) != std::end(m_listeners))
+				m_listeners.erase(std::remove(std::begin(m_listeners), std::end(m_listeners), listener), std::end(m_listeners));
+			return true;
+		}
 
 	public:
 		bool create(const std::string& host, const std::string& port);
@@ -38,6 +53,7 @@ namespace idea::networks::tcp {
 		boost::asio::ip::tcp::resolver				m_resolver;
 		boost::asio::ip::tcp::socket				m_socket;
 		std::shared_ptr<TCPSession>					m_session;
+		std::vector<ITCPClientListener*>			m_listeners;
 		std::string									m_host;
 		uint16_t									m_port;
 	};
