@@ -1,10 +1,10 @@
-#ifndef IDEA_NETWORKS_UDPCLIENT_H
-#define IDEA_NETWORKS_UDPCLIENT_H
+#ifndef IDEA_NETWORKS_UDP_UDPCLIENT_H
+#define IDEA_NETWORKS_UDP_UDPCLIENT_H
 
 #include <boost/asio.hpp>
 #include <deque>
 
-namespace idea::networks {
+namespace idea::networks::udp {
 	class UDPClient
 	{
 	public:
@@ -26,7 +26,7 @@ namespace idea::networks {
 
 	private:
 		bool onWrite();
-		bool onRead(const boost::asio::ip::udp::endpoint& ep, const boost::system::error_code& ec, std::size_t byteTransferred);
+		bool onRead();
 
 	private:
 		boost::asio::io_context&							m_ctx;

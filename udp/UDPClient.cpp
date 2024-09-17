@@ -1,8 +1,9 @@
 #include <boost/log/trivial.hpp>
 #include <boost/lexical_cast.hpp>
+#include <span>
 #include "UDPClient.h"
 
-namespace idea::networks {
+namespace idea::networks::udp {
 	UDPClient::UDPClient(boost::asio::io_context& ctx)
 		: m_ctx(ctx)
 		, m_strand(boost::asio::make_strand(ctx.get_executor()))
@@ -73,13 +74,14 @@ namespace idea::networks {
 
 		try {
 			m_socket.open(boost::asio::ip::udp::v4());
+			m_socket.set_option(boost::asio::socket_base::reuse_address(true));
 		}
 		catch (const std::exception& e) {
 			BOOST_LOG_TRIVIAL(error) << e.what();
 			return false;
 		}
 
-		return true;
+		return onRead();
 	}
 
 	bool UDPClient::write(const std::string& message)
@@ -93,27 +95,6 @@ namespace idea::networks {
 				onWrite();
 			});
 		return true;
-		
-		/*
-		try {
-			boost::asio::ip::udp::endpoint senderEp;
-			m_socket.async_receive_from(boost::asio::buffer(m_data), senderEp,
-				boost::asio::bind_executor(m_strand, [this, senderEp](const boost::system::error_code& ec, std::size_t bytesTransferred) {
-					if (!ec) {
-						this->onRead(senderEp, ec, bytesTransferred);
-					}
-					else {
-						BOOST_LOG_TRIVIAL(error) << ec.message();
-					}
-				}));
-		}
-		catch (const std::exception& e) {
-			BOOST_LOG_TRIVIAL(error) << e.what();
-			return false;
-		}
-
-		return true;
-		*/
 	}
 
 	bool UDPClient::destroy()
@@ -153,9 +134,29 @@ namespace idea::networks {
 		return true;
 	}
 
-	bool UDPClient::onRead(const boost::asio::ip::udp::endpoint& ep, const boost::system::error_code& ec, std::size_t byteTransferred)
+	bool UDPClient::onRead()
 	{
 		BOOST_LOG_TRIVIAL(trace) << std::source_location::current().function_name();
+		try {
+			auto ep = std::make_shared<boost::asio::ip::udp::endpoint>();
+			m_socket.async_receive_from(boost::asio::buffer(m_data), *ep,
+				boost::asio::bind_executor(m_strand, [this, ep](const boost::system::error_code& ec, std::size_t bytesTransferred) {
+					if (!ec) {
+						auto data = std::span<char>(m_data.data(), bytesTransferred);
+						BOOST_LOG_TRIVIAL(trace) << std::string(std::begin(data), std::end(data));
+					}
+					else {
+						BOOST_LOG_TRIVIAL(error) << ec.message();
+						std::this_thread::sleep_for(std::chrono::milliseconds(100));
+					}
+					onRead();
+				}));
+		}
+		catch (const std::exception& e) {
+			BOOST_LOG_TRIVIAL(error) << e.what();
+			return false;
+		}
+
 		return true;
 	}
 }

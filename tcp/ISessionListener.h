@@ -1,9 +1,9 @@
-#ifndef IDEA_NETWORKS_ISESSIONLISTENER_H
-#define IDEA_NETWORKS_ISESSIONLISTENER_H
+#ifndef IDEA_NETWORKS_TCP_ISESSIONLISTENER_H
+#define IDEA_NETWORKS_TCP_ISESSIONLISTENER_H
 
 #include <string>
 
-namespace idea::networks
+namespace idea::networks::tcp
 {
 	class ISessionListener {
 	public:

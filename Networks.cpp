@@ -3,10 +3,11 @@
 #include <boost/log/trivial.hpp>
 #include <boost/asio.hpp>
 #include <thread>
-#include "tcp/TCPServer.h"
-#include "udp/UDPServer.h"
+#include "tcp/TCPEchoServer.h"
+#include "udp/UDPEchoServer.h"
 #include "tcp/TCPClient.h"
 #include "udp/UDPClient.h"
+#include "Context.h"
 #include <chrono>
 
 int main()
@@ -14,33 +15,31 @@ int main()
     BOOST_LOG_TRIVIAL(info) << "Hello Idea";
 
     try {
-        boost::asio::io_context ctx;
-        idea::networks::TCPServer tcpServer(ctx);
+        idea::networks::Context tcpServerContext;
+        idea::networks::tcp::TCPEchoServer tcpServer(tcpServerContext);
         tcpServer.create(18500);
         tcpServer.bind();
 
-        idea::networks::UDPServer udpServer(ctx);
+        // idea::networks::Context udpServerContext;
+        idea::networks::udp::UDPEchoServer udpServer(tcpServerContext);
         udpServer.create(18510);
         udpServer.bind();
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
 
-        idea::networks::TCPClient tcpClient(ctx);
+        // idea::networks::Context tcpClientContext;
+        idea::networks::tcp::TCPClient tcpClient(tcpServerContext.getContext());
         tcpClient.create("127.0.0.1", "18500");
         tcpClient.connect();
 
-        idea::networks::UDPClient udpClient(ctx);
+        // idea::networks::Context udpClientContext;
+        idea::networks::udp::UDPClient udpClient(tcpServerContext.getContext());
         udpClient.create("127.0.0.1", "18510");
 
-        std::vector<std::thread> threads;
-        auto threadCnt = std::thread::hardware_concurrency();
-        BOOST_LOG_TRIVIAL(info) << "Threads number: " << threadCnt;
-        for (auto i = 0; i < threadCnt; ++i) {
-            threads.emplace_back([&ctx]() {
-                ctx.run();
-            });
-        }
-
+        tcpServerContext.run();
+        // udpServerContext.run();
+        // tcpClientContext.run();
+        // udpClientContext.run();
         std::this_thread::sleep_for(std::chrono::seconds(2));
        
         tcpClient.write("Testest");
@@ -62,9 +61,6 @@ int main()
         udpServer.destroy();
 
         std::this_thread::sleep_for(std::chrono::seconds(2));
-
-        for (auto& thread : threads)
-            thread.join();
     }
     catch (const std::exception& e) {
         BOOST_LOG_TRIVIAL(error) << "Exception: " << e.what();

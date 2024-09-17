@@ -18,63 +18,75 @@
     <ClCompile Include="Networks.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="TCPServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="TCPClient.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="TCPSession.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="EchoServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="UDPServer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="UDPClient.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="Utility.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Context.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="tcp\TCPEchoServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tcp\TCPClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tcp\TCPServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="tcp\TCPSession.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="udp\UDPClient.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="udp\UDPServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="udp\UDPEchoServer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="TCPServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="TCPClient.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ISessionListener.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="TCPSession.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="EchoServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="UDPServer.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="UDPClient.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Utility.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ITCPServerListener.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Context.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ITCPClientListener.h">
+    <ClInclude Include="tcp\TCPEchoServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\ISessionListener.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\ITCPClientListener.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\ITCPServerListener.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\TCPClient.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\TCPServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="tcp\TCPSession.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="udp\UDPClient.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="udp\UDPServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="udp\UDPEchoServer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="udp\IUDPClientListener.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="udp\IUDPServerListener.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -138,26 +138,30 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Context.cpp" />
-    <ClCompile Include="EchoServer.cpp" />
     <ClCompile Include="Networks.cpp" />
-    <ClCompile Include="TCPSession.cpp" />
-    <ClCompile Include="TCPClient.cpp" />
-    <ClCompile Include="TCPServer.cpp" />
-    <ClCompile Include="UDPClient.cpp" />
-    <ClCompile Include="UDPServer.cpp" />
+    <ClCompile Include="tcp\TCPEchoServer.cpp" />
+    <ClCompile Include="tcp\TCPClient.cpp" />
+    <ClCompile Include="tcp\TCPServer.cpp" />
+    <ClCompile Include="tcp\TCPSession.cpp" />
+    <ClCompile Include="udp\UDPEchoServer.cpp" />
+    <ClCompile Include="udp\UDPClient.cpp" />
+    <ClCompile Include="udp\UDPServer.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Context.h" />
-    <ClInclude Include="EchoServer.h" />
-    <ClInclude Include="ISessionListener.h" />
-    <ClInclude Include="ITCPClientListener.h" />
-    <ClInclude Include="ITCPServerListener.h" />
-    <ClInclude Include="TCPSession.h" />
-    <ClInclude Include="TCPClient.h" />
-    <ClInclude Include="TCPServer.h" />
-    <ClInclude Include="UDPClient.h" />
-    <ClInclude Include="UDPServer.h" />
+    <ClInclude Include="tcp\TCPEchoServer.h" />
+    <ClInclude Include="tcp\ISessionListener.h" />
+    <ClInclude Include="tcp\ITCPClientListener.h" />
+    <ClInclude Include="tcp\ITCPServerListener.h" />
+    <ClInclude Include="tcp\TCPClient.h" />
+    <ClInclude Include="tcp\TCPServer.h" />
+    <ClInclude Include="tcp\TCPSession.h" />
+    <ClInclude Include="udp\UDPEchoServer.h" />
+    <ClInclude Include="udp\IUDPClientListener.h" />
+    <ClInclude Include="udp\IUDPServerListener.h" />
+    <ClInclude Include="udp\UDPClient.h" />
+    <ClInclude Include="udp\UDPServer.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

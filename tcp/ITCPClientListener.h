@@ -1,9 +1,9 @@
-#ifndef IDEA_NETWORKS_ITCPCLIENTLISTENER_H
-#define IDEA_NETWORKS_ITCPCLIENTLISTENER_H
+#ifndef IDEA_NETWORKS_TCP_ITCPCLIENTLISTENER_H
+#define IDEA_NETWORKS_TCP_ITCPCLIENTLISTENER_H
 
 #include <string>
 
-namespace idea::networks
+namespace idea::networks::tcp
 {
 	class ITCPClientListener {
 	public:

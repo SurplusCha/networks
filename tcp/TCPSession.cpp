@@ -4,7 +4,7 @@
 #include "TCPSession.h"
 #include "ISessionListener.h"
 
-namespace idea::networks {
+namespace idea::networks::tcp {
 	TCPSession::TCPSession(std::size_t channel, boost::asio::ip::tcp::socket&& socket)
 		: m_channel(channel)
 		, m_socket(std::move(socket))

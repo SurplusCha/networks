@@ -2,7 +2,7 @@
 #include <boost/lexical_cast.hpp>
 #include "TCPClient.h"
 
-namespace idea::networks {
+namespace idea::networks::tcp {
 	TCPClient::TCPClient(boost::asio::io_context& ctx)
 		: m_ctx(ctx)
 		, m_resolver(ctx)

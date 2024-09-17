@@ -1,12 +1,12 @@
-#ifndef IDEA_NETWORKS_TCPCLIENT_H
-#define IDEA_NETWORKS_TCPCLIENT_H
+#ifndef IDEA_NETWORKS_TCP_TCPCLIENT_H
+#define IDEA_NETWORKS_TCP_TCPCLIENT_H
 
 #include <memory>
 #include <boost/asio.hpp>
 #include "TCPSession.h"
 #include "ISessionListener.h"
 
-namespace idea::networks {
+namespace idea::networks::tcp {
 	class TCPClient : public std::enable_shared_from_this<TCPClient>, ISessionListener
 	{
 	public:

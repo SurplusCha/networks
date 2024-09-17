@@ -5,7 +5,7 @@
 #include "TCPSession.h"
 #include "ITCPServerListener.h"
 
-namespace idea::networks {
+namespace idea::networks::tcp {
 	TCPServer::TCPServer(boost::asio::io_context& ctx)
 		: m_ctx(ctx)
 		, m_acceptor(std::make_unique<boost::asio::ip::tcp::acceptor>(ctx))

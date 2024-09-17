@@ -1,10 +1,10 @@
-#ifndef IDEA_NETWORKS_TCPSESSION_H
-#define IDEA_NETWORKS_TCPSESSION_H
+#ifndef IDEA_NETWORKS_TCP_TCPSESSION_H
+#define IDEA_NETWORKS_TCP_TCPSESSION_H
 
 #include <deque>
 #include <boost/asio.hpp>
 
-namespace idea::networks
+namespace idea::networks::tcp
 {
 	class ISessionListener;
 	class TCPSession : public std::enable_shared_from_this<TCPSession>

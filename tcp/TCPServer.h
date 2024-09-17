@@ -1,12 +1,12 @@
-#ifndef IDEA_NETWORKS_TCPSERVER_H
-#define IDEA_NETWORKS_TCPSERVER_H
+#ifndef IDEA_NETWORKS_TCP_TCPSERVER_H
+#define IDEA_NETWORKS_TCP_TCPSERVER_H
 
 #include <unordered_map>
 #include <mutex>
 #include <boost/asio.hpp>
 #include "ISessionListener.h"
 
-namespace idea::networks {
+namespace idea::networks::tcp {
 	class TCPSession;
 	class ITCPServerListener;
 	class TCPServer : public ISessionListener
