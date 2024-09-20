@@ -24,11 +24,14 @@ set(TCP
         ${CMAKE_SOURCE_DIR}/tcp/TCPServer.cpp
         ${CMAKE_SOURCE_DIR}/tcp/TCPClient.cpp
         ${CMAKE_SOURCE_DIR}/tcp/TCPSession.cpp
-        ${CMAKE_SOURCE_DIR}/tcp/EchoServer.cpp
+        ${CMAKE_SOURCE_DIR}/tcp/TCPTestClient.cpp
+        ${CMAKE_SOURCE_DIR}/tcp/TCPEchoServer.cpp
 )
 set(UDP
         ${CMAKE_SOURCE_DIR}/udp/UDPServer.cpp
         ${CMAKE_SOURCE_DIR}/udp/UDPClient.cpp
+        ${CMAKE_SOURCE_DIR}/udp/UDPTestClient.cpp
+        ${CMAKE_SOURCE_DIR}/udp/UDPEchoServer.cpp
 )
 
 add_executable(networks Networks.cpp Utility.cpp Context.cpp ${TCP} ${UDP})
